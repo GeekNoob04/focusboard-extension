@@ -1,6 +1,7 @@
 /* global chrome */
 import { useEffect, useState } from "react";
 import "./App.css";
+import LinkIcon from "./components/LinkIcon";
 
 function App() {
     const [time, setTime] = useState(new Date());
@@ -91,14 +92,7 @@ function App() {
             <div className="absolute bottom-8 flex flex-wrap justify-center gap-5">
                 {links.map((link, i) => (
                     <div key={i} className="relative group cursor-pointer">
-                        <div
-                            onClick={() => window.open(link.url, "_self")}
-                            className="w-14 h-14 bg-white rounded-full shadow-md flex items-center justify-center hover:scale-105 transition-all duration-200"
-                        >
-                            <span className="text-sm font-semibold text-[#5062f0]">
-                                {link.name[0].toUpperCase()}
-                            </span>
-                        </div>
+                        <LinkIcon link={link} />
                         <div className="text-xs text-center mt-1">
                             {link.name}
                         </div>
