@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 import LinkIcon from "./components/LinkIcon";
+import Quote from "./components/Quote";
 
 function App() {
     const [time, setTime] = useState(new Date());
@@ -89,6 +90,7 @@ function App() {
                     </div>
                 )}
             </div>
+            <Quote />
             <div className="absolute bottom-8 flex flex-wrap justify-center gap-5">
                 {links.map((link, i) => (
                     <div key={i} className="relative group cursor-pointer">
