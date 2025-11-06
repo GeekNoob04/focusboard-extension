@@ -1,54 +1,76 @@
 /* global chrome */
 import { useEffect, useState } from "react";
+import isDarkColor from "../utils/isDarkColor";
 
-function SettingsSidebar({ isOpen, onClose, setBgColor, setBgImage }) {
-    // passed via props
+function SettingsSidebar({
+    isOpen,
+    onClose,
+    setBgColor,
+    setBgImage,
+    setIsDarkText,
+}) {
     const presetColors = [
-        // Light / default tones
-        "#e8edfc", // soft blue (default)
-        "#f5f5f5", // pure neutral
-        "#fff3e0", // warm cream
-        "#e0f7fa", // aqua tint
-        "#ede7f6", // lilac
-        "#ffe0e0", // light pink
+        // Light tones
+        "#e8edfc",
+        "#f5f5f5",
+        "#fff3e0",
+        "#e0f7fa",
+        "#ede7f6",
+        "#ffe0e0",
+        "#d1ffd6",
+        "#fce4ec",
+        "#e3f2fd",
+        "#f3e5f5",
+        "#e8f5e9",
+        "#fff8e1",
+        "#edeef7",
+        "#eaf4fc",
+        "#d7ccc8",
+        "#cfd8dc",
+        "#fbe9e7",
+        "#f0f4c3",
+        "#ffe082",
+        "#c8e6c9",
 
-        // Calm pastel shades
-        "#fce4ec", // pink blush
-        "#e3f2fd", // pastel blue
-        "#f3e5f5", // lavender haze
-        "#e8f5e9", // soft green
-        "#fff8e1", // pale yellow
-        "#edeef7", // lavender gray
-        "#eaf4fc", // sky tone
-
-        // Muted professional tones
-        "#d7ccc8", // beige gray
-        "#cfd8dc", // cool gray
-        "#fbe9e7", // peach tint
-        "#f0f4c3", // light lime
-        "#ffe082", // light gold
-        "#c8e6c9", // mellow green
-
-        // Slightly darker options (for contrast)
-        "#b3e5fc", // soft cyan
-        "#bbdefb", // light indigo
-        "#ffccbc", // coral tint
-        "#dcedc8", // olive pastel
-        "#ffcdd2", // pink coral
+        // Dark tones
+        "#1e1e1e",
+        "#2c2f33",
+        "#3a3b3c",
+        "#242526",
+        "#37474f",
+        "#263238",
+        "#212121",
+        "#1b1b1b",
+        "#0d1117",
+        "#191919",
     ];
 
     const [selectedColor, setSelectedColor] = useState("#e8edfc");
+    const [isDarkMode, setIsDarkMode] = useState(false);
+
     useEffect(() => {
-        chrome.storage.sync.get(["bgColor"], (data) => {
+        chrome.storage.sync.get(["bgColor", "isDarkText"], (data) => {
             if (data.bgColor) setSelectedColor(data.bgColor);
+            if (data.isDarkText) setIsDarkMode(data.isDarkText);
         });
     }, []);
+
     const handleColorSelect = (color) => {
         setSelectedColor(color);
         setBgColor(color);
         setBgImage("");
-        chrome.storage.sync.set({ bgColor: color, bgImage: "" });
+
+        const dark = isDarkColor(color);
+        setIsDarkText(dark);
+        setIsDarkMode(dark);
+
+        chrome.storage.sync.set({
+            bgColor: color,
+            bgImage: "",
+            isDarkText: dark,
+        });
     };
+
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -57,38 +79,72 @@ function SettingsSidebar({ isOpen, onClose, setBgColor, setBgImage }) {
                 const imgData = reader.result;
                 setBgImage(imgData);
                 setSelectedColor("");
-                chrome.storage.sync.set({ bgImage: imgData });
+                setIsDarkText(false); 
+                setIsDarkMode(false);
+                chrome.storage.sync.set({
+                    bgImage: imgData,
+                    isDarkText: false,
+                });
             };
-            reader.readAsDataURL(file); // convert image into a string URL
+            reader.readAsDataURL(file);
         }
     };
+
     const handleResetBackground = () => {
-        chrome.storage.sync.remove(["bgColor", "bgImage"], () => {
+        chrome.storage.sync.remove(["bgColor", "bgImage", "isDarkText"], () => {
             setBgColor("#e8edfc");
             setBgImage("");
+            setIsDarkText(false);
+            setIsDarkMode(false);
         });
     };
+
     return (
         <div
-            className={`fixed top-0 right-0 h-full w-64 bg-white shadow-2xl z-50 transform transition-transform duration-300 ${
+            className={`fixed top-0 right-0 h-full w-64 z-50 transform transition-transform duration-300 ${
                 isOpen ? "translate-x-0" : "translate-x-full"
+            } ${
+                isDarkMode
+                    ? "bg-[#1e1e1e] text-white shadow-[0_0_10px_rgba(255,255,255,0.2)]"
+                    : "bg-white text-gray-800 shadow-2xl"
             }`}
         >
-            <div className="flex justify-between items-center p-4 border-b">
-                <h2 className="font-semibold text-[#5062f0] text-lg">
+            {/* Header */}
+            <div
+                className={`flex justify-between items-center p-4 border-b ${
+                    isDarkMode ? "border-gray-700" : "border-gray-200"
+                }`}
+            >
+                <h2
+                    className={`font-semibold text-lg ${
+                        isDarkMode ? "text-white" : "text-[#5062f0]"
+                    }`}
+                >
                     Settings
                 </h2>
                 <button
                     onClick={onClose}
-                    className="text-gray-500 hover:text-gray-800"
+                    className={`hover:opacity-80 ${
+                        isDarkMode
+                            ? "text-gray-400 hover:text-white"
+                            : "text-gray-500 hover:text-gray-800"
+                    }`}
                 >
                     ✕
                 </button>
             </div>
+
+            {/* Light Colors */}
             <div className="p-4">
-                <h3 className="font-medium mb-2">Background Color</h3>
-                <div className="grid grid-cols-4 gap-2">
-                    {presetColors.map((color) => (
+                <h3
+                    className={`font-medium mb-2 ${
+                        isDarkMode ? "text-gray-300" : "text-gray-800"
+                    }`}
+                >
+                    Light Colors
+                </h3>
+                <div className="grid grid-cols-4 gap-2 mb-4">
+                    {presetColors.slice(0, 20).map((color) => (
                         <div
                             key={color}
                             className={`w-8 h-8 rounded-full cursor-pointer border ${
@@ -102,22 +158,79 @@ function SettingsSidebar({ isOpen, onClose, setBgColor, setBgImage }) {
                     ))}
                 </div>
             </div>
-            <div className="p-4 border-t">
-                <h3 className="font-medium mb-2">Custom Background</h3>
+
+            {/* Dark Mode Colors */}
+            <div
+                className={`p-4 border-t ${
+                    isDarkMode ? "border-gray-700" : "border-gray-200"
+                }`}
+            >
+                <h3
+                    className={`font-medium mb-2 ${
+                        isDarkMode ? "text-gray-300" : "text-gray-800"
+                    }`}
+                >
+                    Dark Mode
+                </h3>
+                <div className="grid grid-cols-4 gap-2">
+                    {presetColors.slice(20).map((color) => (
+                        <div
+                            key={color}
+                            className={`w-8 h-8 rounded-full cursor-pointer border ${
+                                color === selectedColor
+                                    ? "ring-2 ring-[#5062f0]"
+                                    : ""
+                            }`}
+                            style={{ backgroundColor: color }}
+                            onClick={() => handleColorSelect(color)}
+                        ></div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Image Upload */}
+            <div
+                className={`p-4 border-t ${
+                    isDarkMode ? "border-gray-700" : "border-gray-200"
+                }`}
+            >
+                <h3
+                    className={`font-medium mb-2 ${
+                        isDarkMode ? "text-gray-300" : "text-gray-800"
+                    }`}
+                >
+                    Custom Background
+                </h3>
                 <input
                     type="file"
                     accept="image/*"
                     onChange={handleImageUpload}
-                    className="text-sm"
+                    className={`text-sm ${
+                        isDarkMode ? "text-gray-400" : "text-gray-700"
+                    }`}
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p
+                    className={`text-xs mt-1 ${
+                        isDarkMode ? "text-gray-500" : "text-gray-500"
+                    }`}
+                >
                     Upload a custom background image
                 </p>
             </div>
-            <div className="p-4 border-t">
+
+            {/* Reset Button */}
+            <div
+                className={`p-4 border-t ${
+                    isDarkMode ? "border-gray-700" : "border-gray-200"
+                }`}
+            >
                 <button
                     onClick={handleResetBackground}
-                    className="w-full bg-[#5062f0] text-white py-2 rounded-xl hover:bg-[#3b4ad4] transition"
+                    className={`w-full py-2 rounded-xl transition ${
+                        isDarkMode
+                            ? "bg-white text-black hover:bg-gray-300"
+                            : "bg-[#5062f0] text-white hover:bg-[#3b4ad4]"
+                    }`}
                 >
                     Reset to Default
                 </button>
@@ -125,4 +238,5 @@ function SettingsSidebar({ isOpen, onClose, setBgColor, setBgImage }) {
         </div>
     );
 }
+
 export default SettingsSidebar;
