@@ -5,6 +5,7 @@ import LinkIcon from "./components/LinkIcon";
 import Quote from "./components/Quote";
 import SettingsSidebar from "./components/SettingsSidebar";
 import isDarkColor from "./utils/isDarkColor";
+import getAccentColor from "./utils/getAccentColor";
 
 function App() {
     const [time, setTime] = useState(new Date());
@@ -17,35 +18,59 @@ function App() {
     const [bgColor, setBgColor] = useState("#e8edfc");
     const [bgImage, setBgImage] = useState("");
     const [isDarkText, setIsDarkText] = useState(false);
+    const [accentColor, setAccentColor] = useState("#5062f0");
 
     useEffect(() => {
         chrome.storage.sync.get(
-            ["bgColor", "bgImage", "isDarkText"],
+            ["bgColor", "bgImage", "isDarkText", "accentColor"],
             (data) => {
                 if (data.bgColor) setBgColor(data.bgColor);
                 if (data.bgImage) setBgImage(data.bgImage);
                 if (typeof data.isDarkText === "boolean")
                     setIsDarkText(data.isDarkText);
+                if (data.accentColor) setAccentColor(data.accentColor);
             }
         );
+
+        const handleStorageChange = (changes, areaName) => {
+            if (areaName === "sync" && changes.isDarkText) {
+                setIsDarkText(changes.isDarkText.newValue);
+            }
+            if (areaName === "sync" && changes.bgColor) {
+                setBgColor(changes.bgColor.newValue);
+            }
+            if (areaName === "sync" && changes.bgImage) {
+                setBgImage(changes.bgImage.newValue);
+            }
+            if (areaName === "sync" && changes.accentColor) {
+                setAccentColor(changes.accentColor.newValue);
+            }
+        };
+
+        chrome.storage.onChanged.addListener(handleStorageChange);
+        return () =>
+            chrome.storage.onChanged.removeListener(handleStorageChange);
     }, []);
 
     useEffect(() => {
         const timer = setInterval(() => setTime(new Date()), 1000);
         return () => clearInterval(timer);
     }, []);
+
     useEffect(() => {
         chrome.storage.sync.get(["username", "links"], (data) => {
             if (data.username) setUsername(data.username);
             if (data.links) setLinks(data.links);
         });
     }, []);
+
     const handleNameSubmit = () => {
         if (inputname.trim() !== "") {
             chrome.storage.sync.set({ username: inputname });
             setUsername(inputname);
         }
     };
+
     const hour = time.getHours();
     let greeting = "Good Morning!";
     if (hour >= 12 && hour < 17) greeting = "Good Afternoon!";
@@ -60,16 +85,27 @@ function App() {
             setShowModal(false);
         }
     };
+
     const deleteLink = (index) => {
         const updated = links.filter((_, i) => i !== index);
         setLinks(updated);
         chrome.storage.sync.set({ links: updated });
     };
+
     useEffect(() => {
-        const dark = isDarkColor(bgColor);
-        setIsDarkText(dark);
-        chrome.storage.sync.set({ isDarkText: dark });
-    }, [bgColor]);
+        if (!bgImage) {
+            const dark = isDarkColor(bgColor);
+            setIsDarkText(dark);
+            const accent = getAccentColor(bgColor);
+            setAccentColor(accent);
+
+            chrome.storage.sync.set({
+                isDarkText: dark,
+                accentColor: accent,
+            });
+        }
+    }, [bgColor, bgImage]);
+
     return (
         <div
             className="h-screen w-screen relative flex flex-col items-center justify-center overflow-hidden"
@@ -79,9 +115,9 @@ function App() {
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 color: isDarkText ? "white" : "black",
+                transition: "color 0.5s ease, background 0.5s ease",
             }}
         >
-            {/* ⚙️ Settings button */}
             <button
                 onClick={() => setIsSidebarOpen(true)}
                 className={`absolute top-4 right-4 rounded-full p-2 shadow transition ${
@@ -93,12 +129,13 @@ function App() {
                 ⚙️
             </button>
 
-            {/* 🕒 Clock + Date */}
             <div className="flex flex-col items-center justify-center space-y-2">
                 <div
-                    className={`text-6xl font-semibold ${
-                        isDarkText ? "text-white" : "text-[#5062f0]"
-                    }`}
+                    className="text-6xl font-semibold transition-all duration-700 ease-in-out"
+                    style={{
+                        color: isDarkText ? "#ffffff" : accentColor,
+                        filter: "drop-shadow(0 0 8px rgba(0,0,0,0.1))",
+                    }}
                 >
                     {time.toLocaleTimeString([], {
                         hour: "2-digit",
@@ -106,8 +143,8 @@ function App() {
                     })}
                 </div>
                 <div
-                    className={`text-sm ${
-                        isDarkText ? "text-gray-300" : "opacity-70"
+                    className={`text-sm transition-colors duration-500 ${
+                        isDarkText ? "text-gray-300" : "text-gray-600"
                     }`}
                 >
                     {time.toLocaleDateString([], {
@@ -118,20 +155,19 @@ function App() {
                 </div>
             </div>
 
-            {/* 👤 Username & Greeting */}
             <div className="mt-6 text-center">
                 {username ? (
                     <>
                         <div
-                            className={`text-xl font-medium ${
+                            className={`text-xl font-medium transition-colors duration-500 ${
                                 isDarkText ? "text-gray-100" : "text-black"
                             }`}
                         >
                             Hi {username}
                         </div>
                         <div
-                            className={`text-md ${
-                                isDarkText ? "text-gray-300" : "text-gray-600"
+                            className={`text-md transition-colors duration-500 ${
+                                isDarkText ? "text-gray-400" : "text-gray-600"
                             }`}
                         >
                             {greeting}
@@ -156,16 +192,14 @@ function App() {
                 )}
             </div>
 
-            {/* 🧠 Daily Quote */}
             <Quote />
 
-            {/* 🔗 Links Section */}
             <div className="absolute bottom-8 flex flex-wrap justify-center gap-5">
                 {links.map((link, i) => (
                     <div key={i} className="relative group cursor-pointer">
                         <LinkIcon link={link} />
                         <div
-                            className={`text-xs text-center mt-1 ${
+                            className={`text-xs text-center mt-1 transition-colors duration-500 ${
                                 isDarkText ? "text-gray-300" : "text-black"
                             }`}
                         >
@@ -180,7 +214,6 @@ function App() {
                     </div>
                 ))}
 
-                {/* ➕ Add Shortcut */}
                 <button
                     onClick={() => setShowModal(true)}
                     className="w-14 h-14 bg-[#5062f0] text-white rounded-full shadow-md flex items-center justify-center text-2xl hover:scale-105 transition-all duration-200 cursor-pointer"
@@ -189,7 +222,6 @@ function App() {
                 </button>
             </div>
 
-            {/* ➕ Modal */}
             {showModal && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm">
                     <div className="bg-white rounded-2xl p-6 w-72 flex flex-col gap-3 shadow-xl">
@@ -232,7 +264,6 @@ function App() {
                 </div>
             )}
 
-            {/* ⚙️ Settings Sidebar */}
             <SettingsSidebar
                 isOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}
