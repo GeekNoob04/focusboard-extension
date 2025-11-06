@@ -19,6 +19,8 @@ function App() {
     const [bgImage, setBgImage] = useState("");
     const [isDarkText, setIsDarkText] = useState(false);
     const [accentColor, setAccentColor] = useState("#5062f0");
+    const [editingName, setEditingName] = useState(false);
+    const [tempName, setTempName] = useState("");
 
     useEffect(() => {
         chrome.storage.sync.get(
@@ -157,27 +159,50 @@ function App() {
 
             <div className="mt-6 text-center">
                 {username ? (
-                    <>
-                        <div
-                            className={`text-xl font-medium transition-colors duration-500 ${
-                                isDarkText ? "text-gray-100" : "text-black"
-                            }`}
-                        >
-                            Hi {username}
-                        </div>
-                        <div
-                            className={`text-md transition-colors duration-500 ${
-                                isDarkText ? "text-gray-400" : "text-gray-600"
-                            }`}
-                        >
-                            {greeting}
-                        </div>
-                    </>
+                    <div className="flex flex-col items-center space-y-1">
+                        {editingName ? (
+                            <input
+                                type="text"
+                                value={tempName}
+                                onChange={(e) => setTempName(e.target.value)}
+                                onBlur={() => {
+                                    const newName = tempName.trim();
+                                    if (newName) {
+                                        setUsername(newName);
+                                        chrome.storage.sync.set({
+                                            username: newName,
+                                        });
+                                    }
+                                    setEditingName(false);
+                                }}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") e.target.blur();
+                                    if (e.key === "Escape")
+                                        setEditingName(false);
+                                }}
+                                autoFocus
+                                className="bg-transparent text-xl font-medium text-center border-b-2 border-[#5062f0] focus:outline-none w-40"
+                            />
+                        ) : (
+                            <div
+                                className="text-xl font-medium cursor-pointer hover:opacity-80"
+                                onClick={() => {
+                                    setEditingName(true);
+                                    setTempName(username);
+                                }}
+                                title="Click to edit your name"
+                            >
+                                Hi {username}
+                            </div>
+                        )}
+
+                        <div className="text-md text-gray-600">{greeting}</div>
+                    </div>
                 ) : (
                     <div className="flex flex-col items-center space-y-2">
                         <input
                             type="text"
-                            placeholder="Enter Your name..."
+                            placeholder="Enter your name..."
                             value={inputname}
                             className="px-3 py-2 rounded-xl border border-gray-300 text-center focus:outline-none focus:ring-2 focus:ring-[#5062f0]"
                             onChange={(e) => setInputname(e.target.value)}
