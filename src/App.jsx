@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import "./App.css";
 import LinkIcon from "./components/LinkIcon";
 import Quote from "./components/Quote";
+import SettingsSidebar from "./components/SettingsSidebar";
 
 function App() {
     const [time, setTime] = useState(new Date());
@@ -11,6 +12,16 @@ function App() {
     const [links, setLinks] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [newLink, setNewLink] = useState({ name: "", url: "" });
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [bgColor, setBgColor] = useState("#e8edfc");
+    const [bgImage, setBgImage] = useState("");
+
+    useEffect(() => {
+        chrome.storage.sync.get(["bgColor", "bgImage"], (data) => {
+            if (data.bgColor) setBgColor(data.bgColor);
+            if (data.bgImage) setBgImage(data.bgImage);
+        });
+    }, []);
 
     useEffect(() => {
         const timer = setInterval(() => setTime(new Date()), 1000);
@@ -49,7 +60,22 @@ function App() {
     };
 
     return (
-        <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#e8edfc] text-gray-800 relative">
+        <div
+            className="h-screen w-screen relative flex flex-col items-center justify-center text-gray-800 overflow-hidden"
+            style={{
+                backgroundColor: bgColor,
+                backgroundImage: bgImage ? `url(${bgImage})` : "none",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+            }}
+        >
+            <button
+                onClick={() => setIsSidebarOpen(true)}
+                className="absolute top-4 right-4 bg-white/60 text-gray-700 rounded-full p-2 shadow hover:bg-white/80 transition"
+            >
+                ⚙️
+            </button>
+
             <div className="flex flex-col items-center justify-center space-y-2">
                 <div className="text-6xl font-semibold text-[#5062f0]">
                     {time.toLocaleTimeString([], {
@@ -90,7 +116,9 @@ function App() {
                     </div>
                 )}
             </div>
+
             <Quote />
+
             <div className="absolute bottom-8 flex flex-wrap justify-center gap-5">
                 {links.map((link, i) => (
                     <div key={i} className="relative group cursor-pointer">
@@ -106,6 +134,7 @@ function App() {
                         </button>
                     </div>
                 ))}
+
                 <button
                     onClick={() => setShowModal(true)}
                     className="w-14 h-14 bg-[#5062f0] text-white rounded-full shadow-md flex items-center justify-center text-2xl hover:scale-105 transition-all duration-200 cursor-pointer"
@@ -113,6 +142,7 @@ function App() {
                     +
                 </button>
             </div>
+
             {showModal && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm">
                     <div className="bg-white rounded-2xl p-6 w-72 flex flex-col gap-3 shadow-xl">
@@ -121,7 +151,7 @@ function App() {
                         </h2>
                         <input
                             type="text"
-                            placeholder="website name"
+                            placeholder="Website name"
                             value={newLink.name}
                             onChange={(e) =>
                                 setNewLink({ ...newLink, name: e.target.value })
@@ -154,6 +184,13 @@ function App() {
                     </div>
                 </div>
             )}
+
+            <SettingsSidebar
+                isOpen={isSidebarOpen}
+                onClose={() => setIsSidebarOpen(false)}
+                setBgColor={setBgColor}
+                setBgImage={setBgImage}
+            />
         </div>
     );
 }
