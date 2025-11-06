@@ -32,7 +32,7 @@ function LinkIcon({ link }) {
         <div
             onClick={handleClick}
             onAuxClick={handleClick}
-            className="w-14 h-14 bg-white rounded-full shadow-md flex items-center justify-center hover:scale-105 transition-all duration-200 overflow-hidden relative cursor-pointer"
+            className="w-12 h-12 bg-white/90 backdrop-blur-md rounded-full shadow-lg flex items-center justify-center hover:scale-110 hover:shadow-xl transition-all duration-300 overflow-hidden relative cursor-pointer border border-white/20"
         >
             {!imgError ? (
                 <img

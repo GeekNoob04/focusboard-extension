@@ -50,35 +50,55 @@ function Quote() {
     if (loading) {
         return (
             <div
-                className={`text-sm mt-4 animate-pulse ${
-                    isDarkText ? "text-gray-300" : "text-gray-500"
-                }`}
+                className="text-xs mt-4 animate-pulse"
+                style={{
+                    color: isDarkText
+                        ? "rgba(255, 255, 255, 0.5)"
+                        : "rgba(0, 0, 0, 0.4)",
+                }}
             >
-                Fetching your quote...
+                Loading quote...
             </div>
         );
     }
 
     return (
-        <div
-            className="mt-8 max-w-xl text-center transition-colors duration-500"
-            style={{ minHeight: "80px" }}
-        >
-            <p
-                className={`text-lg italic transition-opacity duration-500 ${
-                    isDarkText ? "text-gray-100" : "text-gray-700"
-                } ${loading ? "opacity-0" : "opacity-100"}`}
+        <div className="mt-4 max-w-xl mx-auto px-4">
+            <div
+                className="backdrop-blur-md rounded-xl p-4 shadow-lg border"
+                style={{
+                    backgroundColor: isDarkText
+                        ? "rgba(255, 255, 255, 0.04)"
+                        : "rgba(255, 255, 255, 0.5)",
+                    border: `1px solid ${
+                        isDarkText
+                            ? "rgba(255, 255, 255, 0.08)"
+                            : "rgba(0, 0, 0, 0.08)"
+                    }`,
+                }}
             >
-                “{quote}”
-            </p>
+                <p
+                    className="text-sm italic font-light leading-relaxed"
+                    style={{
+                        color: isDarkText
+                            ? "rgba(255, 255, 255, 0.9)"
+                            : "rgba(0, 0, 0, 0.8)",
+                    }}
+                >
+                    "{quote}"
+                </p>
 
-            <p
-                className={`text-sm mt-1 ${
-                    isDarkText ? "text-gray-400" : "text-gray-500"
-                }`}
-            >
-                — {author}
-            </p>
+                <p
+                    className="text-xs mt-2 font-medium"
+                    style={{
+                        color: isDarkText
+                            ? "rgba(255, 255, 255, 0.6)"
+                            : "rgba(0, 0, 0, 0.5)",
+                    }}
+                >
+                    — {author}
+                </p>
+            </div>
         </div>
     );
 }

@@ -81,138 +81,223 @@ function App() {
                     : "color 0.5s ease, background 0.5s ease",
             }}
         >
+            {/* Subtle gradient overlay for better readability */}
+            <div className="absolute inset-0 bg-linear-to-b from-black/5 via-transparent to-black/10 pointer-events-none"></div>
+
             <button
                 onClick={() => setIsSidebarOpen(true)}
-                className={`absolute top-4 right-4 rounded-full p-2 shadow transition ${
-                    isDarkText
-                        ? "bg-white/20 text-white hover:bg-white/30"
-                        : "bg-white/60 text-gray-700 hover:bg-white/80"
-                }`}
+                className="absolute top-6 right-6 rounded-2xl p-3 shadow-xl transition-all duration-300 hover:scale-110 z-10 backdrop-blur-md"
+                style={{
+                    backgroundColor: isDarkText
+                        ? "rgba(255, 255, 255, 0.1)"
+                        : "rgba(255, 255, 255, 0.7)",
+                    border: `1px solid ${
+                        isDarkText
+                            ? "rgba(255, 255, 255, 0.2)"
+                            : "rgba(0, 0, 0, 0.1)"
+                    }`,
+                }}
             >
-                ⚙️
+                <span className="text-xl">⚙️</span>
             </button>
 
-            <div className="flex flex-col items-center justify-center space-y-2">
-                <div
-                    className="text-6xl font-semibold"
-                    style={{
-                        color: isDarkText ? "#ffffff" : accentColor,
-                        filter: "drop-shadow(0 0 8px rgba(0,0,0,0.1))",
-                        transition: isLoading ? "none" : "color 0.7s ease",
-                    }}
-                >
-                    {time.toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                    })}
+            <div className="relative z-10 flex flex-col items-center justify-center space-y-6">
+                {/* Enhanced Time Display */}
+                <div className="flex flex-col items-center justify-center space-y-3">
+                    <div
+                        className="text-8xl font-bold tracking-tight"
+                        style={{
+                            color: isDarkText ? "#ffffff" : accentColor,
+                            textShadow: isDarkText
+                                ? "0 4px 20px rgba(0,0,0,0.4)"
+                                : "0 2px 10px rgba(0,0,0,0.1)",
+                            transition: isLoading ? "none" : "all 0.7s ease",
+                        }}
+                    >
+                        {time.toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                        })}
+                    </div>
+                    <div
+                        className="text-lg font-medium tracking-wide"
+                        style={{
+                            color: isDarkText
+                                ? "rgba(255, 255, 255, 0.8)"
+                                : "rgba(0, 0, 0, 0.7)",
+                        }}
+                    >
+                        {time.toLocaleDateString([], {
+                            weekday: "long",
+                            day: "numeric",
+                            month: "long",
+                        })}
+                    </div>
                 </div>
-                <div
-                    className={`text-sm ${
-                        isDarkText ? "text-gray-300" : "text-gray-600"
-                    }`}
-                >
-                    {time.toLocaleDateString([], {
-                        weekday: "short",
-                        day: "numeric",
-                        month: "short",
-                    })}
-                </div>
-            </div>
 
-            <div className="mt-6 text-center">
-                {username ? (
-                    <div className="flex flex-col items-center space-y-1">
-                        {editingName ? (
+                {/* Greeting Section */}
+                <div className="mt-4 text-center">
+                    {username ? (
+                        <div className="flex flex-col items-center space-y-2">
+                            {editingName ? (
+                                <input
+                                    type="text"
+                                    value={tempName}
+                                    onChange={(e) => setTempName(e.target.value)}
+                                    onBlur={() => {
+                                        const newName = tempName.trim();
+                                        if (newName) setUsername(newName);
+                                        setEditingName(false);
+                                    }}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") e.target.blur();
+                                        if (e.key === "Escape")
+                                            setEditingName(false);
+                                    }}
+                                    autoFocus
+                                    className="bg-transparent text-2xl font-medium text-center border-b-2 focus:outline-none w-48"
+                                    style={{
+                                        borderColor: isDarkText
+                                            ? "#ffffff"
+                                            : accentColor,
+                                        color: isDarkText ? "#ffffff" : "inherit",
+                                    }}
+                                />
+                            ) : (
+                                <div
+                                    className="text-2xl font-semibold cursor-pointer hover:opacity-80 transition-all duration-200 px-6 py-2 rounded-2xl backdrop-blur-sm"
+                                    onClick={() => {
+                                        setEditingName(true);
+                                        setTempName(username);
+                                    }}
+                                    title="Click to edit your name"
+                                    style={{
+                                        backgroundColor: isDarkText
+                                            ? "rgba(255, 255, 255, 0.05)"
+                                            : "rgba(255, 255, 255, 0.5)",
+                                    }}
+                                >
+                                    Hi, {username}
+                                </div>
+                            )}
+                            <div
+                                className="text-lg font-light"
+                                style={{
+                                    color: isDarkText
+                                        ? "rgba(255, 255, 255, 0.7)"
+                                        : "rgba(0, 0, 0, 0.6)",
+                                }}
+                            >
+                                {greeting}
+                            </div>
+                        </div>
+                    ) : (
+                        <div
+                            className="flex flex-col items-center space-y-3 backdrop-blur-xl rounded-3xl p-8 shadow-2xl"
+                            style={{
+                                backgroundColor: isDarkText
+                                    ? "rgba(255, 255, 255, 0.1)"
+                                    : "rgba(255, 255, 255, 0.8)",
+                                border: `1px solid ${
+                                    isDarkText
+                                        ? "rgba(255, 255, 255, 0.2)"
+                                        : "rgba(0, 0, 0, 0.1)"
+                                }`,
+                            }}
+                        >
                             <input
                                 type="text"
-                                value={tempName}
-                                onChange={(e) => setTempName(e.target.value)}
-                                onBlur={() => {
-                                    const newName = tempName.trim();
-                                    if (newName) setUsername(newName);
-                                    setEditingName(false);
+                                placeholder="Enter your name..."
+                                value={inputname}
+                                onChange={(e) => setInputname(e.target.value)}
+                                onKeyDown={(e) =>
+                                    e.key === "Enter" && handleNameSubmit()
+                                }
+                                className="px-4 py-3 rounded-xl text-center focus:outline-none focus:ring-2 focus:ring-[#5062f0] transition-all duration-200"
+                                style={{
+                                    backgroundColor: isDarkText
+                                        ? "rgba(255, 255, 255, 0.1)"
+                                        : "rgba(255, 255, 255, 0.9)",
+                                    border: `1px solid ${
+                                        isDarkText
+                                            ? "rgba(255, 255, 255, 0.3)"
+                                            : "rgba(0, 0, 0, 0.2)"
+                                    }`,
+                                    color: isDarkText ? "#ffffff" : "#000000",
                                 }}
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter") e.target.blur();
-                                    if (e.key === "Escape")
-                                        setEditingName(false);
-                                }}
-                                autoFocus
-                                className="bg-transparent text-xl font-medium text-center border-b-2 border-[#5062f0] focus:outline-none w-40"
                             />
-                        ) : (
-                            <div
-                                className="text-xl font-medium cursor-pointer hover:opacity-80"
-                                onClick={() => {
-                                    setEditingName(true);
-                                    setTempName(username);
-                                }}
-                                title="Click to edit your name"
+                            <button
+                                onClick={handleNameSubmit}
+                                className="bg-[#5062f0] text-white px-6 py-3 rounded-xl font-semibold hover:scale-105 hover:bg-[#3949c6] transition-all duration-200 shadow-lg"
                             >
-                                Hi {username}
-                            </div>
-                        )}
-                        <div className="text-md text-gray-600">{greeting}</div>
-                    </div>
-                ) : (
-                    <div className="flex flex-col items-center space-y-2">
+                                Get Started
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                {/* Enhanced Search Bar */}
+                <div className="mt-4 flex justify-center">
+                    <div className="relative group">
+                        <span
+                            className="absolute left-4 top-3.5 text-lg transition-all duration-200"
+                            style={{
+                                color: isDarkText
+                                    ? "rgba(255, 255, 255, 0.5)"
+                                    : "rgba(0, 0, 0, 0.5)",
+                            }}
+                        >
+                            🔍
+                        </span>
                         <input
                             type="text"
-                            placeholder="Enter your name..."
-                            value={inputname}
-                            onChange={(e) => setInputname(e.target.value)}
-                            className="px-3 py-2 rounded-xl border border-gray-300 text-center focus:outline-none focus:ring-2 focus:ring-[#5062f0]"
+                            placeholder="Search Google..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onKeyDown={handleSearch}
+                            className="w-96 md:w-[500px] pl-12 pr-6 py-3.5 rounded-2xl text-center shadow-xl focus:outline-none focus:ring-2 transition-all duration-300 backdrop-blur-xl group-hover:shadow-2xl"
+                            style={{
+                                backgroundColor: isDarkText
+                                    ? "rgba(255, 255, 255, 0.15)"
+                                    : "rgba(255, 255, 255, 0.9)",
+                                border: `1px solid ${
+                                    isDarkText
+                                        ? "rgba(255, 255, 255, 0.3)"
+                                        : "rgba(0, 0, 0, 0.1)"
+                                }`,
+                                color: isDarkText ? "#ffffff" : "#000000",
+                                focusRingColor: isDarkText
+                                    ? "rgba(255, 255, 255, 0.5)"
+                                    : "#5062f0",
+                            }}
                         />
-                        <button
-                            onClick={handleNameSubmit}
-                            className="bg-[#5062f0] text-white px-4 py-2 rounded-xl hover:bg-[#3949c6]"
-                        >
-                            Save
-                        </button>
                     </div>
-                )}
-            </div>
-
-            <div className="mt-6 flex justify-center">
-                <div className="relative">
-                    <span
-                        className={`absolute left-3 top-2.5 ${
-                            isDarkText ? "text-gray-400" : "text-gray-500"
-                        }`}
-                    >
-                        🔍
-                    </span>
-                    <input
-                        type="text"
-                        placeholder="Search Google..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        onKeyDown={handleSearch}
-                        className={`w-80 md:w-96 pl-9 pr-4 py-2 rounded-xl text-center shadow-sm focus:outline-none focus:ring-2 ${
-                            isDarkText
-                                ? "bg-[#1f1f1f] text-white placeholder-gray-400 border border-gray-600 focus:ring-white"
-                                : "bg-white text-black placeholder-gray-500 border border-gray-300 focus:ring-[#5062f0]"
-                        }`}
-                    />
                 </div>
+
+                <Quote />
             </div>
 
-            <Quote />
-
-            <div className="absolute bottom-8 flex flex-wrap justify-center gap-5">
+            {/* Enhanced Shortcuts */}
+            <div className="absolute bottom-12 flex flex-wrap justify-center gap-6 px-8 z-10">
                 {links.map((link, i) => (
                     <div key={i} className="relative group cursor-pointer">
                         <LinkIcon link={link} />
                         <div
-                            className={`text-xs text-center mt-1 ${
-                                isDarkText ? "text-gray-300" : "text-black"
-                            }`}
+                            className="text-sm text-center mt-2 font-medium"
+                            style={{
+                                color: isDarkText
+                                    ? "rgba(255, 255, 255, 0.9)"
+                                    : "rgba(0, 0, 0, 0.8)",
+                                textShadow: isDarkText
+                                    ? "0 2px 8px rgba(0,0,0,0.3)"
+                                    : "none",
+                            }}
                         >
                             {link.name}
                         </div>
                         <button
                             onClick={() => deleteLink(i)}
-                            className="absolute -top-1 -right-1 bg-red-500 text-white w-4 h-4 rounded-full text-[10px] hidden group-hover:block"
+                            className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full text-sm font-bold opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-lg hover:bg-red-600 hover:scale-110"
                         >
                             ×
                         </button>
@@ -220,16 +305,43 @@ function App() {
                 ))}
                 <button
                     onClick={() => setShowModal(true)}
-                    className="w-14 h-14 bg-[#5062f0] text-white rounded-full shadow-md flex items-center justify-center text-2xl hover:scale-105 transition-all duration-200 cursor-pointer"
+                    className="w-16 h-16 rounded-2xl shadow-xl flex items-center justify-center text-3xl font-light hover:scale-110 transition-all duration-300 cursor-pointer backdrop-blur-sm"
+                    style={{
+                        background: "linear-gradient(135deg, #5062f0 0%, #7c3aed 100%)",
+                        color: "white",
+                        boxShadow: "0 8px 32px rgba(80, 98, 240, 0.4)",
+                    }}
                 >
                     +
                 </button>
             </div>
 
+            {/* Enhanced Modal */}
             {showModal && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm">
-                    <div className="bg-white rounded-2xl p-6 w-72 flex flex-col gap-3 shadow-xl">
-                        <h2 className="text-lg font-semibold text-center text-[#5062f0]">
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-md z-50">
+                    <div
+                        className="backdrop-blur-xl rounded-3xl p-8 w-96 flex flex-col gap-4 shadow-2xl animate-in fade-in zoom-in duration-200"
+                        style={{
+                            backgroundColor: isDarkText
+                                ? "rgba(30, 30, 30, 0.95)"
+                                : "rgba(255, 255, 255, 0.95)",
+                            border: `1px solid ${
+                                isDarkText
+                                    ? "rgba(255, 255, 255, 0.2)"
+                                    : "rgba(0, 0, 0, 0.1)"
+                            }`,
+                        }}
+                    >
+                        <h2
+                            className="text-2xl font-bold text-center"
+                            style={{
+                                background:
+                                    "linear-gradient(135deg, #5062f0 0%, #7c3aed 100%)",
+                                WebkitBackgroundClip: "text",
+                                WebkitTextFillColor: "transparent",
+                                backgroundClip: "text",
+                            }}
+                        >
                             Add Shortcut
                         </h2>
                         <input
@@ -239,7 +351,18 @@ function App() {
                             onChange={(e) =>
                                 setNewLink({ ...newLink, name: e.target.value })
                             }
-                            className="border rounded-lg px-3 py-2"
+                            className="rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#5062f0] transition-all duration-200"
+                            style={{
+                                backgroundColor: isDarkText
+                                    ? "rgba(255, 255, 255, 0.1)"
+                                    : "rgba(0, 0, 0, 0.05)",
+                                border: `2px solid ${
+                                    isDarkText
+                                        ? "rgba(255, 255, 255, 0.2)"
+                                        : "rgba(0, 0, 0, 0.1)"
+                                }`,
+                                color: isDarkText ? "#ffffff" : "#000000",
+                            }}
                         />
                         <input
                             type="text"
@@ -248,17 +371,43 @@ function App() {
                             onChange={(e) =>
                                 setNewLink({ ...newLink, url: e.target.value })
                             }
-                            className="border rounded-lg px-3 py-2"
+                            className="rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#5062f0] transition-all duration-200"
+                            style={{
+                                backgroundColor: isDarkText
+                                    ? "rgba(255, 255, 255, 0.1)"
+                                    : "rgba(0, 0, 0, 0.05)",
+                                border: `2px solid ${
+                                    isDarkText
+                                        ? "rgba(255, 255, 255, 0.2)"
+                                        : "rgba(0, 0, 0, 0.1)"
+                                }`,
+                                color: isDarkText ? "#ffffff" : "#000000",
+                            }}
                         />
-                        <div className="flex gap-2 justify-end">
+                        <div className="flex gap-3 justify-end mt-2">
                             <button
-                                className="text-gray-500 px-3 py-1 hover:text-gray-700"
-                                onClick={() => setShowModal(false)}
+                                className="px-5 py-2 font-medium rounded-xl transition-all duration-200 hover:scale-105"
+                                style={{
+                                    color: isDarkText
+                                        ? "rgba(255, 255, 255, 0.7)"
+                                        : "rgba(0, 0, 0, 0.6)",
+                                    backgroundColor: isDarkText
+                                        ? "rgba(255, 255, 255, 0.1)"
+                                        : "rgba(0, 0, 0, 0.05)",
+                                }}
+                                onClick={() => {
+                                    setShowModal(false);
+                                    setNewLink({ name: "", url: "" });
+                                }}
                             >
                                 Cancel
                             </button>
                             <button
-                                className="bg-[#5062f0] text-white px-4 py-1 rounded-lg hover:bg-[#3949c6]"
+                                className="px-6 py-2 rounded-xl font-semibold hover:scale-105 transition-all duration-200 shadow-lg text-white"
+                                style={{
+                                    background:
+                                        "linear-gradient(135deg, #5062f0 0%, #7c3aed 100%)",
+                                }}
                                 onClick={() => {
                                     addLink(newLink);
                                     setNewLink({ name: "", url: "" });

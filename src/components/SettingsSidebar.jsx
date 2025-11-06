@@ -71,112 +71,167 @@ function SettingsSidebar({ isOpen, onClose }) {
     };
 
     return (
-        <div
-            className={`fixed top-0 right-0 h-full w-64 z-50 transform transition-transform duration-300 ${
-                isOpen ? "translate-x-0" : "translate-x-full"
-            } ${
-                isDarkText
-                    ? "bg-[#1e1e1e] text-white shadow-[0_0_10px_rgba(255,255,255,0.2)]"
-                    : "bg-white text-gray-800 shadow-2xl"
-            }`}
-        >
-            {/* Header */}
-            <div
-                className={`flex justify-between items-center p-4 border-b ${
-                    isDarkText ? "border-gray-700" : "border-gray-200"
-                }`}
-            >
-                <h2
-                    className={`font-semibold text-lg ${
-                        isDarkText ? "text-white" : "text-[#5062f0]"
-                    }`}
-                >
-                    Settings
-                </h2>
-                <button
+        <>
+            {/* Backdrop overlay */}
+            {isOpen && (
+                <div
+                    className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300"
                     onClick={onClose}
-                    className={`hover:opacity-80 ${
-                        isDarkText
-                            ? "text-gray-400 hover:text-white"
-                            : "text-gray-500 hover:text-gray-800"
-                    }`}
-                >
-                    ✕
-                </button>
-            </div>
+                ></div>
+            )}
 
-            {/* Light Colors */}
-            <div className="p-4">
-                <h3
-                    className={`font-medium mb-2 ${
-                        isDarkText ? "text-gray-300" : "text-gray-800"
-                    }`}
+            {/* Sidebar */}
+            <div
+                className={`fixed top-0 right-0 h-full w-72 z-50 transform transition-all duration-300 ${
+                    isOpen ? "translate-x-0" : "translate-x-full"
+                } backdrop-blur-2xl shadow-2xl`}
+                style={{
+                    backgroundColor: isDarkText
+                        ? "rgba(30, 30, 30, 0.95)"
+                        : "rgba(255, 255, 255, 0.95)",
+                    borderLeft: `1px solid ${
+                        isDarkText
+                            ? "rgba(255, 255, 255, 0.1)"
+                            : "rgba(0, 0, 0, 0.1)"
+                    }`,
+                }}
+            >
+                {/* Header */}
+                <div
+                    className="flex justify-between items-center p-6 border-b"
+                    style={{
+                        borderColor: isDarkText
+                            ? "rgba(255, 255, 255, 0.1)"
+                            : "rgba(0, 0, 0, 0.1)",
+                    }}
                 >
-                    Light Colors
-                </h3>
-                <div className="grid grid-cols-4 gap-2 mb-4">
-                    {presetColors.slice(0, 20).map((color) => (
-                        <div
-                            key={color}
-                            className={`w-8 h-8 rounded-full cursor-pointer border ${
-                                color === selectedColor
-                                    ? "ring-2 ring-[#5062f0]"
-                                    : ""
-                            }`}
-                            style={{ backgroundColor: color }}
-                            onClick={() => handleColorSelect(color)}
-                        ></div>
-                    ))}
+                    <h2
+                        className="font-bold text-xl"
+                        style={{
+                            background: isDarkText
+                                ? "linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%)"
+                                : "linear-gradient(135deg, #5062f0 0%, #7c3aed 100%)",
+                            WebkitBackgroundClip: "text",
+                            WebkitTextFillColor: "transparent",
+                            backgroundClip: "text",
+                        }}
+                    >
+                        Settings
+                    </h2>
+                    <button
+                        onClick={onClose}
+                        className="w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-110"
+                        style={{
+                            backgroundColor: isDarkText
+                                ? "rgba(255, 255, 255, 0.1)"
+                                : "rgba(0, 0, 0, 0.05)",
+                            color: isDarkText
+                                ? "rgba(255, 255, 255, 0.8)"
+                                : "rgba(0, 0, 0, 0.6)",
+                        }}
+                    >
+                        ✕
+                    </button>
+                </div>
+
+                {/* Scrollable content */}
+                <div className="overflow-y-auto h-[calc(100%-80px)] p-6 space-y-6">
+                    {/* Light Colors Section */}
+                    <div>
+                        <h3
+                            className="font-semibold mb-3 text-sm uppercase tracking-wide"
+                            style={{
+                                color: isDarkText
+                                    ? "rgba(255, 255, 255, 0.7)"
+                                    : "rgba(0, 0, 0, 0.6)",
+                            }}
+                        >
+                            Light Colors
+                        </h3>
+                        <div className="grid grid-cols-5 gap-2.5">
+                            {presetColors.slice(0, 20).map((color) => (
+                                <button
+                                    key={color}
+                                    className={`w-full aspect-square rounded-xl cursor-pointer transition-all duration-200 hover:scale-110 ${
+                                        color === selectedColor
+                                            ? "ring-3 ring-[#5062f0] ring-offset-2 scale-105"
+                                            : "hover:ring-2 hover:ring-gray-400"
+                                    }`}
+                                    style={{
+                                        backgroundColor: color,
+                                        boxShadow:
+                                            color === selectedColor
+                                                ? "0 4px 12px rgba(80, 98, 240, 0.4)"
+                                                : "0 2px 8px rgba(0, 0, 0, 0.1)",
+                                        ringOffsetColor: isDarkText
+                                            ? "#1e1e1e"
+                                            : "#ffffff",
+                                    }}
+                                    onClick={() => handleColorSelect(color)}
+                                />
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Dark Mode Colors Section */}
+                    <div>
+                        <h3
+                            className="font-semibold mb-3 text-sm uppercase tracking-wide"
+                            style={{
+                                color: isDarkText
+                                    ? "rgba(255, 255, 255, 0.7)"
+                                    : "rgba(0, 0, 0, 0.6)",
+                            }}
+                        >
+                            Dark Mode
+                        </h3>
+                        <div className="grid grid-cols-5 gap-2.5">
+                            {presetColors.slice(20).map((color) => (
+                                <button
+                                    key={color}
+                                    className={`w-full aspect-square rounded-xl cursor-pointer transition-all duration-200 hover:scale-110 border ${
+                                        color === selectedColor
+                                            ? "ring-3 ring-[#5062f0] ring-offset-2 scale-105"
+                                            : "hover:ring-2 hover:ring-gray-400"
+                                    }`}
+                                    style={{
+                                        backgroundColor: color,
+                                        borderColor: "rgba(255, 255, 255, 0.1)",
+                                        boxShadow:
+                                            color === selectedColor
+                                                ? "0 4px 12px rgba(80, 98, 240, 0.4)"
+                                                : "0 2px 8px rgba(0, 0, 0, 0.2)",
+                                        ringOffsetColor: isDarkText
+                                            ? "#1e1e1e"
+                                            : "#ffffff",
+                                    }}
+                                    onClick={() => handleColorSelect(color)}
+                                />
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Reset Button */}
+                    <div className="pt-4">
+                        <button
+                            onClick={handleResetBackground}
+                            className="w-full py-3 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg"
+                            style={{
+                                background: isDarkText
+                                    ? "linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%)"
+                                    : "linear-gradient(135deg, #5062f0 0%, #7c3aed 100%)",
+                                color: isDarkText ? "#000000" : "#ffffff",
+                                boxShadow: isDarkText
+                                    ? "0 4px 12px rgba(255, 255, 255, 0.2)"
+                                    : "0 4px 12px rgba(80, 98, 240, 0.4)",
+                            }}
+                        >
+                            Reset to Default
+                        </button>
+                    </div>
                 </div>
             </div>
-
-            {/* Dark Mode Colors */}
-            <div
-                className={`p-4 border-t ${
-                    isDarkText ? "border-gray-700" : "border-gray-200"
-                }`}
-            >
-                <h3
-                    className={`font-medium mb-2 ${
-                        isDarkText ? "text-gray-300" : "text-gray-800"
-                    }`}
-                >
-                    Dark Mode
-                </h3>
-                <div className="grid grid-cols-4 gap-2">
-                    {presetColors.slice(20).map((color) => (
-                        <div
-                            key={color}
-                            className={`w-8 h-8 rounded-full cursor-pointer border ${
-                                color === selectedColor
-                                    ? "ring-2 ring-[#5062f0]"
-                                    : ""
-                            }`}
-                            style={{ backgroundColor: color }}
-                            onClick={() => handleColorSelect(color)}
-                        ></div>
-                    ))}
-                </div>
-            </div>
-
-            {/* Reset Button */}
-            <div
-                className={`p-4 border-t ${
-                    isDarkText ? "border-gray-700" : "border-gray-200"
-                }`}
-            >
-                <button
-                    onClick={handleResetBackground}
-                    className={`w-full py-2 rounded-xl transition ${
-                        isDarkText
-                            ? "bg-white text-black hover:bg-gray-300"
-                            : "bg-[#5062f0] text-white hover:bg-[#3b4ad4]"
-                    }`}
-                >
-                    Reset to Default
-                </button>
-            </div>
-        </div>
+        </>
     );
 }
 
