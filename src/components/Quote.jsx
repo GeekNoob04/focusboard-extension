@@ -14,6 +14,7 @@ function Quote() {
                 setIsDarkText(data.isDarkText);
             }
         });
+
         const handleStorageChange = (changes, areaName) => {
             if (areaName === "sync" && changes.isDarkText) {
                 setIsDarkText(changes.isDarkText.newValue);
@@ -24,6 +25,7 @@ function Quote() {
         return () =>
             chrome.storage.onChanged.removeListener(handleStorageChange);
     }, []);
+
     useEffect(() => {
         chrome.storage.sync.get(["dailyQuote", "quoteTimestamp"], (data) => {
             const now = Date.now();
@@ -37,9 +39,12 @@ function Quote() {
                 setLoading(false);
             } else {
                 axios
-                    .get("https://api.quotable.io/random")
+                    .get("https://zenquotes.io/api/random")
                     .then((res) => {
-                        const { content, author } = res.data;
+                        const quoteData = res.data[0];
+                        const content = quoteData.q;
+                        const author = quoteData.a;
+
                         setQuote(content);
                         setAuthor(author);
 
@@ -52,12 +57,11 @@ function Quote() {
                         setQuote("Stay focused. Stay humble.");
                         setAuthor("FocusBoard");
                     })
-                    .finally(() => {
-                        setLoading(false);
-                    });
+                    .finally(() => setLoading(false));
             }
         });
     }, []);
+
     if (loading) {
         return (
             <div
@@ -69,38 +73,27 @@ function Quote() {
             </div>
         );
     }
+
     return (
         <div
             className="mt-8 max-w-xl text-center transition-colors duration-500"
             style={{ minHeight: "80px" }}
         >
-            {loading ? (
-                <div
-                    className={`text-sm animate-pulse ${
-                        isDarkText ? "text-gray-300" : "text-gray-500"
-                    }`}
-                >
-                    Fetching your quote...
-                </div>
-            ) : (
-                <>
-                    <p
-                        className={`text-lg italic transition-opacity duration-500 ${
-                            isDarkText ? "text-gray-100" : "text-gray-700"
-                        } ${loading ? "opacity-0" : "opacity-100"}`}
-                    >
-                        “{quote}”
-                    </p>
+            <p
+                className={`text-lg italic transition-opacity duration-500 ${
+                    isDarkText ? "text-gray-100" : "text-gray-700"
+                } ${loading ? "opacity-0" : "opacity-100"}`}
+            >
+                “{quote}”
+            </p>
 
-                    <p
-                        className={`text-sm mt-1 ${
-                            isDarkText ? "text-gray-400" : "text-gray-500"
-                        }`}
-                    >
-                        — {author}
-                    </p>
-                </>
-            )}
+            <p
+                className={`text-sm mt-1 ${
+                    isDarkText ? "text-gray-400" : "text-gray-500"
+                }`}
+            >
+                — {author}
+            </p>
         </div>
     );
 }

@@ -7,7 +7,7 @@
         "newtab": "index.html"
     },
     "permissions": ["storage"],
-    "host_permissions": ["https://api.quotable.io/*"],
+    "host_permissions": ["https://zenquotes.io/*"],
     "icons": {
         "16": "icon16.png",
         "32": "icon32.png",
