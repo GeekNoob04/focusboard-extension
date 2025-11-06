@@ -1,4 +1,3 @@
-/* global chrome */
 import { useEffect, useState } from "react";
 import "./App.css";
 import LinkIcon from "./components/LinkIcon";
@@ -6,74 +5,53 @@ import Quote from "./components/Quote";
 import SettingsSidebar from "./components/SettingsSidebar";
 import isDarkColor from "./utils/isDarkColor";
 import getAccentColor from "./utils/getAccentColor";
+import { useFocusStore } from "./store/useFocusStore";
 
 function App() {
+    const {
+        username,
+        links,
+        bgColor,
+        bgImage,
+        isDarkText,
+        accentColor,
+        isLoading,
+        setUsername,
+        addLink,
+        deleteLink,
+        setBgColor,
+        setBgImage,
+        setIsDarkText,
+        setAccentColor,
+        hydrateFromStorage,
+    } = useFocusStore();
+
     const [time, setTime] = useState(new Date());
-    const [username, setUsername] = useState("");
     const [inputname, setInputname] = useState("");
-    const [links, setLinks] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [newLink, setNewLink] = useState({ name: "", url: "" });
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const [bgColor, setBgColor] = useState("#e8edfc");
-    const [bgImage, setBgImage] = useState("");
-    const [isDarkText, setIsDarkText] = useState(false);
-    const [accentColor, setAccentColor] = useState("#5062f0");
     const [editingName, setEditingName] = useState(false);
     const [tempName, setTempName] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
-    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        chrome.storage.sync.get(
-            ["bgColor", "bgImage", "isDarkText", "accentColor"],
-            (data) => {
-                if (data.bgColor) setBgColor(data.bgColor);
-                if (data.bgImage) setBgImage(data.bgImage);
-                if (typeof data.isDarkText === "boolean")
-                    setIsDarkText(data.isDarkText);
-                if (data.accentColor) setAccentColor(data.accentColor);
-                setTimeout(() => setIsLoading(false), 100);
-            }
-        );
-
-        const handleStorageChange = (changes, areaName) => {
-            if (areaName === "sync" && changes.isDarkText) {
-                setIsDarkText(changes.isDarkText.newValue);
-            }
-            if (areaName === "sync" && changes.bgColor) {
-                setBgColor(changes.bgColor.newValue);
-            }
-            if (areaName === "sync" && changes.bgImage) {
-                setBgImage(changes.bgImage.newValue);
-            }
-            if (areaName === "sync" && changes.accentColor) {
-                setAccentColor(changes.accentColor.newValue);
-            }
-        };
-
-        chrome.storage.onChanged.addListener(handleStorageChange);
-        return () =>
-            chrome.storage.onChanged.removeListener(handleStorageChange);
-    }, []);
-
-    useEffect(() => {
+        hydrateFromStorage();
         const timer = setInterval(() => setTime(new Date()), 1000);
         return () => clearInterval(timer);
     }, []);
 
     useEffect(() => {
-        chrome.storage.sync.get(["username", "links"], (data) => {
-            if (data.username) setUsername(data.username);
-            if (data.links) setLinks(data.links);
-        });
-    }, []);
+        if (!bgImage) {
+            const dark = isDarkColor(bgColor);
+            setIsDarkText(dark);
+            const accent = getAccentColor(bgColor);
+            setAccentColor(accent);
+        }
+    }, [bgColor, bgImage]);
 
     const handleNameSubmit = () => {
-        if (inputname.trim() !== "") {
-            chrome.storage.sync.set({ username: inputname });
-            setUsername(inputname);
-        }
+        if (inputname.trim()) setUsername(inputname);
     };
 
     const handleSearch = (e) => {
@@ -88,36 +66,6 @@ function App() {
     let greeting = "Good Morning!";
     if (hour >= 12 && hour < 17) greeting = "Good Afternoon!";
     else if (hour >= 17 || hour < 4) greeting = "Good Evening!";
-
-    const addLink = () => {
-        if (newLink.name && newLink.url) {
-            const updatedLinks = [...links, newLink];
-            setLinks(updatedLinks);
-            chrome.storage.sync.set({ links: updatedLinks });
-            setNewLink({ name: "", url: "" });
-            setShowModal(false);
-        }
-    };
-
-    const deleteLink = (index) => {
-        const updated = links.filter((_, i) => i !== index);
-        setLinks(updated);
-        chrome.storage.sync.set({ links: updated });
-    };
-
-    useEffect(() => {
-        if (!bgImage) {
-            const dark = isDarkColor(bgColor);
-            setIsDarkText(dark);
-            const accent = getAccentColor(bgColor);
-            setAccentColor(accent);
-
-            chrome.storage.sync.set({
-                isDarkText: dark,
-                accentColor: accent,
-            });
-        }
-    }, [bgColor, bgImage]);
 
     return (
         <div
@@ -159,7 +107,7 @@ function App() {
                     })}
                 </div>
                 <div
-                    className={`text-sm transition-colors duration-500 ${
+                    className={`text-sm ${
                         isDarkText ? "text-gray-300" : "text-gray-600"
                     }`}
                 >
@@ -181,12 +129,7 @@ function App() {
                                 onChange={(e) => setTempName(e.target.value)}
                                 onBlur={() => {
                                     const newName = tempName.trim();
-                                    if (newName) {
-                                        setUsername(newName);
-                                        chrome.storage.sync.set({
-                                            username: newName,
-                                        });
-                                    }
+                                    if (newName) setUsername(newName);
                                     setEditingName(false);
                                 }}
                                 onKeyDown={(e) => {
@@ -209,7 +152,6 @@ function App() {
                                 Hi {username}
                             </div>
                         )}
-
                         <div className="text-md text-gray-600">{greeting}</div>
                     </div>
                 ) : (
@@ -218,8 +160,8 @@ function App() {
                             type="text"
                             placeholder="Enter your name..."
                             value={inputname}
-                            className="px-3 py-2 rounded-xl border border-gray-300 text-center focus:outline-none focus:ring-2 focus:ring-[#5062f0]"
                             onChange={(e) => setInputname(e.target.value)}
+                            className="px-3 py-2 rounded-xl border border-gray-300 text-center focus:outline-none focus:ring-2 focus:ring-[#5062f0]"
                         />
                         <button
                             onClick={handleNameSubmit}
@@ -234,7 +176,7 @@ function App() {
             <div className="mt-6 flex justify-center">
                 <div className="relative">
                     <span
-                        className={`absolute left-3 top-2.5 transition-colors duration-300 ${
+                        className={`absolute left-3 top-2.5 ${
                             isDarkText ? "text-gray-400" : "text-gray-500"
                         }`}
                     >
@@ -246,7 +188,7 @@ function App() {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         onKeyDown={handleSearch}
-                        className={`w-80 md:w-96 pl-9 pr-4 py-2 rounded-xl text-center shadow-sm focus:outline-none focus:ring-2 transition-all duration-200 ${
+                        className={`w-80 md:w-96 pl-9 pr-4 py-2 rounded-xl text-center shadow-sm focus:outline-none focus:ring-2 ${
                             isDarkText
                                 ? "bg-[#1f1f1f] text-white placeholder-gray-400 border border-gray-600 focus:ring-white"
                                 : "bg-white text-black placeholder-gray-500 border border-gray-300 focus:ring-[#5062f0]"
@@ -262,7 +204,7 @@ function App() {
                     <div key={i} className="relative group cursor-pointer">
                         <LinkIcon link={link} />
                         <div
-                            className={`text-xs text-center mt-1 transition-colors duration-500 ${
+                            className={`text-xs text-center mt-1 ${
                                 isDarkText ? "text-gray-300" : "text-black"
                             }`}
                         >
@@ -276,7 +218,6 @@ function App() {
                         </button>
                     </div>
                 ))}
-
                 <button
                     onClick={() => setShowModal(true)}
                     className="w-14 h-14 bg-[#5062f0] text-white rounded-full shadow-md flex items-center justify-center text-2xl hover:scale-105 transition-all duration-200 cursor-pointer"
@@ -311,14 +252,18 @@ function App() {
                         />
                         <div className="flex gap-2 justify-end">
                             <button
-                                className="text-gray-500 px-3 py-1 hover:text-gray-700 cursor-pointer"
+                                className="text-gray-500 px-3 py-1 hover:text-gray-700"
                                 onClick={() => setShowModal(false)}
                             >
                                 Cancel
                             </button>
                             <button
-                                className="bg-[#5062f0] text-white px-4 py-1 rounded-lg hover:bg-[#3949c6] cursor-pointer"
-                                onClick={addLink}
+                                className="bg-[#5062f0] text-white px-4 py-1 rounded-lg hover:bg-[#3949c6]"
+                                onClick={() => {
+                                    addLink(newLink);
+                                    setNewLink({ name: "", url: "" });
+                                    setShowModal(false);
+                                }}
                             >
                                 Add
                             </button>

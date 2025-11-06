@@ -1,14 +1,12 @@
 /* global chrome */
 import { useEffect, useState } from "react";
 import isDarkColor from "../utils/isDarkColor";
+import { useFocusStore } from "../store/useFocusStore";
 
-function SettingsSidebar({
-    isOpen,
-    onClose,
-    setBgColor,
-    setBgImage,
-    setIsDarkText,
-}) {
+function SettingsSidebar({ isOpen, onClose }) {
+    const { bgColor, setBgColor, setBgImage, isDarkText, setIsDarkText } =
+        useFocusStore();
+
     const presetColors = [
         // Light tones
         "#e8edfc",
@@ -45,25 +43,18 @@ function SettingsSidebar({
         "#191919",
     ];
 
-    const [selectedColor, setSelectedColor] = useState("#e8edfc");
-    const [isDarkMode, setIsDarkMode] = useState(false);
+    const [selectedColor, setSelectedColor] = useState(bgColor);
 
     useEffect(() => {
-        chrome.storage.sync.get(["bgColor", "isDarkText"], (data) => {
-            if (data.bgColor) setSelectedColor(data.bgColor);
-            if (data.isDarkText) setIsDarkMode(data.isDarkText);
-        });
-    }, []);
+        setSelectedColor(bgColor);
+    }, [bgColor]);
 
     const handleColorSelect = (color) => {
         setSelectedColor(color);
         setBgColor(color);
         setBgImage("");
-
         const dark = isDarkColor(color);
         setIsDarkText(dark);
-        setIsDarkMode(dark);
-
         chrome.storage.sync.set({
             bgColor: color,
             bgImage: "",
@@ -76,7 +67,6 @@ function SettingsSidebar({
             setBgColor("#e8edfc");
             setBgImage("");
             setIsDarkText(false);
-            setIsDarkMode(false);
         });
     };
 
@@ -85,19 +75,20 @@ function SettingsSidebar({
             className={`fixed top-0 right-0 h-full w-64 z-50 transform transition-transform duration-300 ${
                 isOpen ? "translate-x-0" : "translate-x-full"
             } ${
-                isDarkMode
+                isDarkText
                     ? "bg-[#1e1e1e] text-white shadow-[0_0_10px_rgba(255,255,255,0.2)]"
                     : "bg-white text-gray-800 shadow-2xl"
             }`}
         >
+            {/* Header */}
             <div
                 className={`flex justify-between items-center p-4 border-b ${
-                    isDarkMode ? "border-gray-700" : "border-gray-200"
+                    isDarkText ? "border-gray-700" : "border-gray-200"
                 }`}
             >
                 <h2
                     className={`font-semibold text-lg ${
-                        isDarkMode ? "text-white" : "text-[#5062f0]"
+                        isDarkText ? "text-white" : "text-[#5062f0]"
                     }`}
                 >
                     Settings
@@ -105,7 +96,7 @@ function SettingsSidebar({
                 <button
                     onClick={onClose}
                     className={`hover:opacity-80 ${
-                        isDarkMode
+                        isDarkText
                             ? "text-gray-400 hover:text-white"
                             : "text-gray-500 hover:text-gray-800"
                     }`}
@@ -114,10 +105,11 @@ function SettingsSidebar({
                 </button>
             </div>
 
+            {/* Light Colors */}
             <div className="p-4">
                 <h3
                     className={`font-medium mb-2 ${
-                        isDarkMode ? "text-gray-300" : "text-gray-800"
+                        isDarkText ? "text-gray-300" : "text-gray-800"
                     }`}
                 >
                     Light Colors
@@ -138,14 +130,15 @@ function SettingsSidebar({
                 </div>
             </div>
 
+            {/* Dark Mode Colors */}
             <div
                 className={`p-4 border-t ${
-                    isDarkMode ? "border-gray-700" : "border-gray-200"
+                    isDarkText ? "border-gray-700" : "border-gray-200"
                 }`}
             >
                 <h3
                     className={`font-medium mb-2 ${
-                        isDarkMode ? "text-gray-300" : "text-gray-800"
+                        isDarkText ? "text-gray-300" : "text-gray-800"
                     }`}
                 >
                     Dark Mode
@@ -166,15 +159,16 @@ function SettingsSidebar({
                 </div>
             </div>
 
+            {/* Reset Button */}
             <div
                 className={`p-4 border-t ${
-                    isDarkMode ? "border-gray-700" : "border-gray-200"
+                    isDarkText ? "border-gray-700" : "border-gray-200"
                 }`}
             >
                 <button
                     onClick={handleResetBackground}
                     className={`w-full py-2 rounded-xl transition ${
-                        isDarkMode
+                        isDarkText
                             ? "bg-white text-black hover:bg-gray-300"
                             : "bg-[#5062f0] text-white hover:bg-[#3b4ad4]"
                     }`}

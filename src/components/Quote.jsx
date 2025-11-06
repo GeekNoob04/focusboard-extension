@@ -1,30 +1,13 @@
 /* global chrome */
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useFocusStore } from "../store/useFocusStore";
 
 function Quote() {
+    const { isDarkText } = useFocusStore();
     const [quote, setQuote] = useState("");
     const [author, setAuthor] = useState("");
     const [loading, setLoading] = useState(true);
-    const [isDarkText, setIsDarkText] = useState(false);
-
-    useEffect(() => {
-        chrome.storage.sync.get(["isDarkText"], (data) => {
-            if (typeof data.isDarkText === "boolean") {
-                setIsDarkText(data.isDarkText);
-            }
-        });
-
-        const handleStorageChange = (changes, areaName) => {
-            if (areaName === "sync" && changes.isDarkText) {
-                setIsDarkText(changes.isDarkText.newValue);
-            }
-        };
-
-        chrome.storage.onChanged.addListener(handleStorageChange);
-        return () =>
-            chrome.storage.onChanged.removeListener(handleStorageChange);
-    }, []);
 
     useEffect(() => {
         chrome.storage.sync.get(["dailyQuote", "quoteTimestamp"], (data) => {
@@ -34,10 +17,12 @@ function Quote() {
                 data.dailyQuote &&
                 now - data.quoteTimestamp < 12 * 60 * 60 * 1000
             ) {
+                // Use cached quote
                 setQuote(data.dailyQuote.content);
                 setAuthor(data.dailyQuote.author);
                 setLoading(false);
             } else {
+                // Fetch a new quote from ZenQuotes
                 axios
                     .get("https://zenquotes.io/api/random")
                     .then((res) => {
