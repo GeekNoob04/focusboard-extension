@@ -21,6 +21,7 @@ function App() {
     const [accentColor, setAccentColor] = useState("#5062f0");
     const [editingName, setEditingName] = useState(false);
     const [tempName, setTempName] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
         chrome.storage.sync.get(
@@ -70,6 +71,14 @@ function App() {
         if (inputname.trim() !== "") {
             chrome.storage.sync.set({ username: inputname });
             setUsername(inputname);
+        }
+    };
+
+    const handleSearch = (e) => {
+        if (e.key === "Enter" && searchQuery.trim() !== "") {
+            const query = encodeURIComponent(searchQuery.trim());
+            window.open(`https://www.google.com/search?q=${query}`, "_blank");
+            setSearchQuery("");
         }
     };
 
@@ -215,6 +224,22 @@ function App() {
                         </button>
                     </div>
                 )}
+            </div>
+
+            <div className="mt-6 flex justify-center">
+                <div className="relative">
+                    <span className="absolute left-3 top-2.5 text-gray-400">
+                        🔍
+                    </span>
+                    <input
+                        type="text"
+                        placeholder="Search Google..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={handleSearch}
+                        className="w-80 md:w-96 pl-9 pr-4 py-2 rounded-xl border border-gray-300 text-center shadow-sm focus:outline-none focus:ring-2 focus:ring-[#5062f0] transition-all duration-200"
+                    />
+                </div>
             </div>
 
             <Quote />
