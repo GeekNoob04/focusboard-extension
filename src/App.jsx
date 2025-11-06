@@ -22,6 +22,7 @@ function App() {
     const [editingName, setEditingName] = useState(false);
     const [tempName, setTempName] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         chrome.storage.sync.get(
@@ -32,6 +33,7 @@ function App() {
                 if (typeof data.isDarkText === "boolean")
                     setIsDarkText(data.isDarkText);
                 if (data.accentColor) setAccentColor(data.accentColor);
+                setTimeout(() => setIsLoading(false), 100);
             }
         );
 
@@ -77,7 +79,7 @@ function App() {
     const handleSearch = (e) => {
         if (e.key === "Enter" && searchQuery.trim() !== "") {
             const query = encodeURIComponent(searchQuery.trim());
-            window.open(`https://www.google.com/search?q=${query}`, "_blank");
+            window.open(`https://www.google.com/search?q=${query}`, "_self");
             setSearchQuery("");
         }
     };
@@ -126,7 +128,9 @@ function App() {
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 color: isDarkText ? "white" : "black",
-                transition: "color 0.5s ease, background 0.5s ease",
+                transition: isLoading
+                    ? "none"
+                    : "color 0.5s ease, background 0.5s ease",
             }}
         >
             <button
@@ -142,10 +146,11 @@ function App() {
 
             <div className="flex flex-col items-center justify-center space-y-2">
                 <div
-                    className="text-6xl font-semibold transition-all duration-700 ease-in-out"
+                    className="text-6xl font-semibold"
                     style={{
                         color: isDarkText ? "#ffffff" : accentColor,
                         filter: "drop-shadow(0 0 8px rgba(0,0,0,0.1))",
+                        transition: isLoading ? "none" : "color 0.7s ease",
                     }}
                 >
                     {time.toLocaleTimeString([], {
@@ -228,7 +233,11 @@ function App() {
 
             <div className="mt-6 flex justify-center">
                 <div className="relative">
-                    <span className="absolute left-3 top-2.5 text-gray-400">
+                    <span
+                        className={`absolute left-3 top-2.5 transition-colors duration-300 ${
+                            isDarkText ? "text-gray-400" : "text-gray-500"
+                        }`}
+                    >
                         🔍
                     </span>
                     <input
@@ -237,7 +246,11 @@ function App() {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         onKeyDown={handleSearch}
-                        className="w-80 md:w-96 pl-9 pr-4 py-2 rounded-xl border border-gray-300 text-center shadow-sm focus:outline-none focus:ring-2 focus:ring-[#5062f0] transition-all duration-200"
+                        className={`w-80 md:w-96 pl-9 pr-4 py-2 rounded-xl text-center shadow-sm focus:outline-none focus:ring-2 transition-all duration-200 ${
+                            isDarkText
+                                ? "bg-[#1f1f1f] text-white placeholder-gray-400 border border-gray-600 focus:ring-white"
+                                : "bg-white text-black placeholder-gray-500 border border-gray-300 focus:ring-[#5062f0]"
+                        }`}
                     />
                 </div>
             </div>

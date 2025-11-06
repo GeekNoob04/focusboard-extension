@@ -70,21 +70,37 @@ function Quote() {
         );
     }
     return (
-        <div className="mt-8 max-w-xl text-center transition-colors duration-500">
-            <p
-                className={`text-lg italic ${
-                    isDarkText ? "text-gray-100" : "text-gray-700"
-                }`}
-            >
-                “{quote}”
-            </p>
-            <p
-                className={`text-sm mt-1 ${
-                    isDarkText ? "text-gray-400" : "text-gray-500"
-                }`}
-            >
-                — {author}
-            </p>
+        <div
+            className="mt-8 max-w-xl text-center transition-colors duration-500"
+            style={{ minHeight: "80px" }}
+        >
+            {loading ? (
+                <div
+                    className={`text-sm animate-pulse ${
+                        isDarkText ? "text-gray-300" : "text-gray-500"
+                    }`}
+                >
+                    Fetching your quote...
+                </div>
+            ) : (
+                <>
+                    <p
+                        className={`text-lg italic transition-opacity duration-500 ${
+                            isDarkText ? "text-gray-100" : "text-gray-700"
+                        } ${loading ? "opacity-0" : "opacity-100"}`}
+                    >
+                        “{quote}”
+                    </p>
+
+                    <p
+                        className={`text-sm mt-1 ${
+                            isDarkText ? "text-gray-400" : "text-gray-500"
+                        }`}
+                    >
+                        — {author}
+                    </p>
+                </>
+            )}
         </div>
     );
 }

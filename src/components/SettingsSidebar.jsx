@@ -71,25 +71,6 @@ function SettingsSidebar({
         });
     };
 
-    const handleImageUpload = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const imgData = reader.result;
-                setBgImage(imgData);
-                setSelectedColor("");
-                setIsDarkText(false); 
-                setIsDarkMode(false);
-                chrome.storage.sync.set({
-                    bgImage: imgData,
-                    isDarkText: false,
-                });
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
     const handleResetBackground = () => {
         chrome.storage.sync.remove(["bgColor", "bgImage", "isDarkText"], () => {
             setBgColor("#e8edfc");
@@ -109,7 +90,6 @@ function SettingsSidebar({
                     : "bg-white text-gray-800 shadow-2xl"
             }`}
         >
-            {/* Header */}
             <div
                 className={`flex justify-between items-center p-4 border-b ${
                     isDarkMode ? "border-gray-700" : "border-gray-200"
@@ -134,7 +114,6 @@ function SettingsSidebar({
                 </button>
             </div>
 
-            {/* Light Colors */}
             <div className="p-4">
                 <h3
                     className={`font-medium mb-2 ${
@@ -159,7 +138,6 @@ function SettingsSidebar({
                 </div>
             </div>
 
-            {/* Dark Mode Colors */}
             <div
                 className={`p-4 border-t ${
                     isDarkMode ? "border-gray-700" : "border-gray-200"
@@ -188,37 +166,6 @@ function SettingsSidebar({
                 </div>
             </div>
 
-            {/* Image Upload */}
-            <div
-                className={`p-4 border-t ${
-                    isDarkMode ? "border-gray-700" : "border-gray-200"
-                }`}
-            >
-                <h3
-                    className={`font-medium mb-2 ${
-                        isDarkMode ? "text-gray-300" : "text-gray-800"
-                    }`}
-                >
-                    Custom Background
-                </h3>
-                <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className={`text-sm ${
-                        isDarkMode ? "text-gray-400" : "text-gray-700"
-                    }`}
-                />
-                <p
-                    className={`text-xs mt-1 ${
-                        isDarkMode ? "text-gray-500" : "text-gray-500"
-                    }`}
-                >
-                    Upload a custom background image
-                </p>
-            </div>
-
-            {/* Reset Button */}
             <div
                 className={`p-4 border-t ${
                     isDarkMode ? "border-gray-700" : "border-gray-200"
