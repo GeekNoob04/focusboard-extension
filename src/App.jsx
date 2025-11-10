@@ -1,3 +1,4 @@
+/* global chrome */
 import { useEffect, useState } from "react";
 import "./App.css";
 import LinkIcon from "./components/LinkIcon";
@@ -54,10 +55,27 @@ function App() {
         if (inputname.trim()) setUsername(inputname);
     };
 
+    // FIXED: Use Chrome Search API instead of hardcoded Google search
     const handleSearch = (e) => {
         if (e.key === "Enter" && searchQuery.trim() !== "") {
-            const query = encodeURIComponent(searchQuery.trim());
-            window.open(`https://www.google.com/search?q=${query}`, "_self");
+            // Check if chrome.search API is available (it should be in a Chrome extension)
+            if (
+                typeof chrome !== "undefined" &&
+                chrome.search &&
+                chrome.search.query
+            ) {
+                chrome.search.query({
+                    text: searchQuery.trim(),
+                    disposition: "CURRENT_TAB",
+                });
+            } else {
+                // Fallback for development/testing outside extension context
+                const query = encodeURIComponent(searchQuery.trim());
+                window.open(
+                    `https://www.google.com/search?q=${query}`,
+                    "_self"
+                );
+            }
             setSearchQuery("");
         }
     };
@@ -143,7 +161,9 @@ function App() {
                                 <input
                                     type="text"
                                     value={tempName}
-                                    onChange={(e) => setTempName(e.target.value)}
+                                    onChange={(e) =>
+                                        setTempName(e.target.value)
+                                    }
                                     onBlur={() => {
                                         const newName = tempName.trim();
                                         if (newName) setUsername(newName);
@@ -160,7 +180,9 @@ function App() {
                                         borderColor: isDarkText
                                             ? "#ffffff"
                                             : accentColor,
-                                        color: isDarkText ? "#ffffff" : "inherit",
+                                        color: isDarkText
+                                            ? "#ffffff"
+                                            : "inherit",
                                     }}
                                 />
                             ) : (
@@ -236,26 +258,38 @@ function App() {
                     )}
                 </div>
 
-                {/* Enhanced Search Bar */}
+                {/* Enhanced Search Bar - Now uses Chrome Search API */}
                 <div className="mt-4 flex justify-center">
                     <div className="relative group">
-                        <span
-                            className="absolute left-4 top-3.5 text-lg transition-all duration-200"
+                        <div
+                            className="absolute left-4 top-1/2 -translate-y-1/2 transition-all duration-200"
                             style={{
                                 color: isDarkText
                                     ? "rgba(255, 255, 255, 0.5)"
                                     : "rgba(0, 0, 0, 0.5)",
                             }}
                         >
-                            🔍
-                        </span>
+                            <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            >
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="m21 21-4.35-4.35"></path>
+                            </svg>
+                        </div>
                         <input
                             type="text"
-                            placeholder="Search Google..."
+                            placeholder="Search the web..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             onKeyDown={handleSearch}
-                            className="w-96 md:w-[500px] pl-12 pr-6 py-3.5 rounded-2xl text-center shadow-xl focus:outline-none focus:ring-2 transition-all duration-300 backdrop-blur-xl group-hover:shadow-2xl"
+                            className="w-96 md:w-[500px] pl-12 pr-12 py-3.5 rounded-2xl shadow-xl focus:outline-none focus:ring-2 transition-all duration-300 backdrop-blur-xl group-hover:shadow-2xl"
                             style={{
                                 backgroundColor: isDarkText
                                     ? "rgba(255, 255, 255, 0.15)"
@@ -271,6 +305,31 @@ function App() {
                                     : "#5062f0",
                             }}
                         />
+                        {searchQuery && (
+                            <button
+                                onClick={() => setSearchQuery("")}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 transition-all duration-200 hover:scale-110"
+                                style={{
+                                    color: isDarkText
+                                        ? "rgba(255, 255, 255, 0.5)"
+                                        : "rgba(0, 0, 0, 0.5)",
+                                }}
+                            >
+                                <svg
+                                    width="18"
+                                    height="18"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -307,7 +366,8 @@ function App() {
                     onClick={() => setShowModal(true)}
                     className="w-16 h-16 rounded-2xl shadow-xl flex items-center justify-center text-3xl font-light hover:scale-110 transition-all duration-300 cursor-pointer backdrop-blur-sm"
                     style={{
-                        background: "linear-gradient(135deg, #5062f0 0%, #7c3aed 100%)",
+                        background:
+                            "linear-gradient(135deg, #5062f0 0%, #7c3aed 100%)",
                         color: "white",
                         boxShadow: "0 8px 32px rgba(80, 98, 240, 0.4)",
                     }}

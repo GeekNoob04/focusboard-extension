@@ -6,7 +6,7 @@
     "chrome_url_overrides": {
         "newtab": "index.html"
     },
-    "permissions": ["storage"],
+    "permissions": ["storage", "search"],
     "host_permissions": ["https://zenquotes.io/*"],
     "icons": {
         "16": "icon16.png",
