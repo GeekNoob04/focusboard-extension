@@ -38,6 +38,9 @@ function App() {
 
     useEffect(() => {
         hydrateFromStorage();
+        setTimeout(() => {
+            useFocusStore.setState({ isLoading: false });
+        }, 0);
         const timer = setInterval(() => setTime(new Date()), 1000);
         return () => clearInterval(timer);
     }, []);
@@ -94,9 +97,7 @@ function App() {
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 color: isDarkText ? "white" : "black",
-                transition: isLoading
-                    ? "none"
-                    : "color 0.5s ease, background 0.5s ease",
+                transition: "none",
             }}
         >
             {/* Subtle gradient overlay for better readability */}
@@ -129,7 +130,7 @@ function App() {
                             textShadow: isDarkText
                                 ? "0 4px 20px rgba(0,0,0,0.4)"
                                 : "0 2px 10px rgba(0,0,0,0.1)",
-                            transition: isLoading ? "none" : "all 0.7s ease",
+                            transition: "none",
                         }}
                     >
                         {time.toLocaleTimeString([], {

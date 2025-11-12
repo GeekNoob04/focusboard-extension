@@ -90,9 +90,9 @@ export const useFocusStore = create((set, get) => ({
                     bgImage: data.bgImage || "",
                     isDarkText: data.isDarkText || false,
                     accentColor: data.accentColor || "#5062f0",
-                    isLoading: false,
                 });
             }
         );
+        set({ isLoading: false });
     },
 }));
